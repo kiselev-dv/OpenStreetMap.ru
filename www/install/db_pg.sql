@@ -22,3 +22,16 @@ INSERT INTO "pagedata" ("name", "text", "color", "level") VALUES
 	( 'news', 'Новости', '#db4c39', 0),
 	( 'diaries', 'Дняффки', '#faaa87', 0),
 	( 'login', 'Вход', '#4a8af5', 0);
+
+-- for OAuth logins
+create table tokens (
+  id serial,
+  hash varchar(32) not null,
+  osm_id int not null default 0,
+  osm_user varchar(255) not null,
+  oa_token varchar(255) not null,
+  oa_secret varchar(255) not null,
+  ctime timestamp without time zone not null,
+  mtime timestamp without time zone not null
+);
+

@@ -1,11 +1,16 @@
-Options -Indexes
-
-DirectoryIndex index.php
 ErrorDocument 403 /include/404.php
 ErrorDocument 404 /include/404.php
 
 RewriteEngine on
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^authcb$ authcb.php [L,QSA]
+RewriteRule ^login$ login.php [L]
+RewriteRule ^logout$ logout.php [L]
+
 RewriteCond %{REQUEST_FILENAME} !-f [OR]
 RewriteCond %{REQUEST_FILENAME} ^(.php)
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [L]
+RewriteRule ^(.+)$ index.php [L]
+

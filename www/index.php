@@ -1,5 +1,5 @@
 <?
-include_once ('include/config.php');
+include_once ('include/functions.php');
 
 $_URL = preg_replace("/^(.*?)index\.php$/is", "$1", $_SERVER['SCRIPT_NAME']);
 $_URL = preg_replace("/^".preg_quote($_URL, "/")."/is", "", urldecode($_SERVER['REQUEST_URI']));
@@ -10,9 +10,21 @@ if (preg_match("/^index\.(?:html|php)$/is", $_URL[count($_URL) - 1])) unset($_UR
 
 if (empty($_URL[0]))
   $_URL[0] = 'map';
-$result = pg_query("SELECT * FROM pagedata WHERE name='".pg_escape_string($_URL[0])."' AND activate");
-if (pg_num_rows($result) <= 0) Err404();
-$data = pg_fetch_assoc($result);
+
+if ($_URL[0] == "account") {
+  if (!checkauth()) {
+    session_start();
+    $_SESSION["returnto"] = "./account";
+    Header("Location: ./login");
+    die;
+  }
+  $data = array("name"=>"account", "text"=>"Настройки");
+} else {
+  dbconn();
+  $result = pg_query("SELECT * FROM pagedata WHERE name='".pg_escape_string($_URL[0])."' AND activate");
+  if (pg_num_rows($result) <= 0) Err404();
+  $data = pg_fetch_assoc($result);
+}
 
 if (!file_exists($data['name'].'.php'))
   Err404();
