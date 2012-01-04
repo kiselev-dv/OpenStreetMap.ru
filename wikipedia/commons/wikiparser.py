@@ -5,8 +5,8 @@ import re
 def parse(text):
   if not fast_check(text):
     return {}
-  text = parse_links(text)
   text = parse_format(text)
+  text = parse_links(text)
   out = parse_templates(text)
   return out
 
