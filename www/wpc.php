@@ -1,4 +1,5 @@
 <?
+Header("Content-Type: text/xml; charset=utf-8");
 
 include_once("include/passwd.php");
 // declare $pgconnstr in include/passwd.php
@@ -43,7 +44,7 @@ while ($row = pg_fetch_assoc($res)) {
   $pm->name = "<a href=\"http://commons.wikimedia.org/\"><img src=\"http://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Commons-logo.svg/20px-Commons-logo.svg.png\" width=20 height=27 border=0></a> Wikimedia Commons";
 
   $pm->addChild("description");
-  $pm->{'description'} = "<p>".$row["desc"]."</p><a href=\"http://commons.wikipedia.org/wiki/".$row["page"]."\" target=_blank><img src=\"".htmlspecialchars(furl(str_replace(" ","_",str_replace("File:","",$row["page"]))))."\" /></a>";
+  $pm->{'description'} = "<p>".$row["desc"]."</p><a href=\"http://commons.wikipedia.org/wiki/".htmlspecialchars($row["page"])."\" target=_blank><img src=\"".htmlspecialchars(furl(str_replace(" ","_",str_replace("File:","",$row["page"]))))."\" /></a>";
   $pm->addChild("styleUrl");
   $pm->styleUrl = "#Commons-logo";
   $p = $pm->addChild("Point");
