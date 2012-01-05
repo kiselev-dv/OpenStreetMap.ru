@@ -108,6 +108,7 @@ function init() {
       this._map.on('moveend',reloadKML,this);
       this.visible = true;
       this._iterateLayers(map.addLayer, map);
+      reloadKML();
     },
     onRemove: function(map) {
       this._map.off('moveend',reloadKML,this);
