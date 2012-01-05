@@ -36,17 +36,29 @@ $bbox = "ST_SetSRID(ST_GeomFromText('LINESTRING($bbox[1] $bbox[0],$bbox[3] $bbox
 $center = "ST_SetSRID(ST_MakePoint($cy,$cx),4326)";
 $dist = "ST_Distance_Sphere(point,$center)";
 
-$query = "SELECT page,\"desc\",ST_X(point) AS lon,ST_Y(point) AS lat FROM wpc_img WHERE point && $bbox ORDER BY $dist ASC LIMIT 256";
+$query = "SELECT MIN(page) AS page,MIN(\"desc\") AS \"desc\",MIN(ST_X(point)) AS lon,MIN(ST_Y(point)) AS lat FROM wpc_img WHERE point && $bbox GROUP BY point ORDER BY $dist ASC LIMIT 256";
 
 $res = pg_query($query);
-if(!$res) { print "Error in query\n"; exit; }
+if(!$res) {
+  Header("Content-Type: text/xml; charset=utf-8");
+  $pm = $doc->addChild("Placemark");
+  $pm->addChild("name");
+  $pm->name = "Error in query";
+  $pm->addChild("description");
+  $pm->{'description'} = "<br/><b>$query<b>";
+  $p = $pm->addChild("Point");
+  $p->addChild("coordinates");
+  $p->coordinates = $cx.",".$cy.",0";
+  print $doc->asXML();
+  exit;
+}
 
 Header("Content-Type: text/xml; charset=utf-8");
 
 while ($row = pg_fetch_assoc($res)) {
   $pm = $doc->addChild("Placemark");
   $pm->addChild("name");
-  $pm->name = "<a href=\"http://commons.wikimedia.org/\"><img src=\"http://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Commons-logo.svg/20px-Commons-logo.svg.png\" width=20 height=27 border=0></a> Wikimedia Commons";
+  $pm->name = "<a href=\"http://commons.wikimedia.org/\"><img src=\"img/commons-mini.png\" width=\"20\" height=\"27\" border=\"0\"></a> Wikimedia Commons";
 
   $pm->addChild("description");
   $pm->{'description'} = "<p>".$row["desc"]."</p><a href=\"http://commons.wikipedia.org/wiki/".htmlspecialchars($row["page"])."\" target=_blank><img src=\"".htmlspecialchars(furl(str_replace(" ","_",str_replace("File:","",$row["page"]))))."\" /></a>";
