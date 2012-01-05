@@ -1,6 +1,4 @@
 <?
-Header("Content-Type: text/xml; charset=utf-8");
-
 include_once("include/passwd.php");
 // declare $pgconnstr in include/passwd.php
 pg_connect($pgconnstr);
@@ -32,11 +30,18 @@ $bbox = explode(",", $_GET["bbox"]);
 foreach($bbox as $v)
   if (!preg_match('/^-?\d+(\.\d+)$/', $v)) die;
 
+$cx = ($bbox[0]+$bbox[2])/2;
+$cy = ($bbox[1]+$bbox[3])/2;
 $bbox = "ST_SetSRID(ST_GeomFromText('LINESTRING($bbox[1] $bbox[0],$bbox[3] $bbox[2])'),4326)";
+$center = "ST_SetSRID(ST_MakePoint($cy,$cx),4326)";
+$dist = "ST_Distance_Sphere(point,$center)";
 
-$query = "SELECT page,\"desc\",ST_X(point) AS lon,ST_Y(point) AS lat FROM wpc_img WHERE point && $bbox LIMIT 256";
+$query = "SELECT page,\"desc\",ST_X(point) AS lon,ST_Y(point) AS lat FROM wpc_img WHERE point && $bbox ORDER BY $dist ASC LIMIT 256";
 
 $res = pg_query($query);
+if(!$res) { print "Error in query\n"; exit; }
+
+Header("Content-Type: text/xml; charset=utf-8");
 
 while ($row = pg_fetch_assoc($res)) {
   $pm = $doc->addChild("Placemark");
