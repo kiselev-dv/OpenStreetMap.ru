@@ -15,7 +15,7 @@ function setView(position) {
 
 function reloadKML() {
   if (!wpc.layers.visible) return;
-  //if(osm.map.getZoom()<13) return;
+  if(osm.map.getZoom()<8) return;
   var zoom = osm.map.getZoom();
   var bounds = osm.map.getBounds();
   var minll = bounds.getSouthWest();
