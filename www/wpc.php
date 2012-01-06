@@ -30,18 +30,30 @@ $bbox = explode(",", $_GET["bbox"]);
 foreach($bbox as $v)
   if (!preg_match('/^-?\d+(\.\d+)$/', $v)) die;
 
+if (isset($_GET["algo"]))
+  $algo = $_GET["algo"];
+else
+  $algo = 1;
+
 $cx = ($bbox[1]+$bbox[3])/2;
 $cy = ($bbox[0]+$bbox[2])/2;
-$dx = $bbox[3]-$bbox[1];
-$dy = $bbox[2]-$bbox[0];
-$dx = $dx/30;
-$dy = $dy/30;
-$bbox = "ST_SetSRID(ST_GeomFromText('LINESTRING($bbox[1] $bbox[0],$bbox[3] $bbox[2])'),4326)";
-$center = "ST_SetSRID(ST_MakePoint($cx,$cy),4326)";
-$dist = "ST_Distance_Sphere(MIN(point),$center)";
-$dist = "RANDOM()";
 
-$query = "SELECT MIN(page) AS page,MIN(\"desc\") AS \"desc\",MIN(ST_X(point)) AS lon,MIN(ST_Y(point)) AS lat FROM wpc_img WHERE point && $bbox GROUP BY ST_SnapToGrid(point,$cx,$cy,$dx,$dy) ORDER BY $dist ASC LIMIT 256";
+$bboxg = "ST_SetSRID(ST_GeomFromText('LINESTRING($bbox[1] $bbox[0],$bbox[3] $bbox[2])'),4326)";
+$center = "ST_SetSRID(ST_MakePoint($cx,$cy),4326)";
+
+if ($algo == 1) {
+  $dx = $bbox[3]-$bbox[1];
+  $dy = $bbox[2]-$bbox[0];
+  $dx = $dx/30;
+  $dy = $dy/30;
+  $orderby = "RANDOM()";
+  $query = "SELECT MIN(page) AS page,MIN(\"desc\") AS \"desc\",MIN(ST_X(point)) AS lon,MIN(ST_Y(point)) AS lat FROM wpc_img WHERE point && $bboxg GROUP BY ST_SnapToGrid(point,$cx,$cy,$dx,$dy) ORDER BY $orderby ASC LIMIT 256";
+} elseif($algo == 0) {
+  $orderby = "ST_Distance_Sphere(MIN(point),$center)";
+  $query = "SELECT MIN(page) AS page,MIN(\"desc\") AS \"desc\",MIN(ST_X(point)) AS lon,MIN(ST_Y(point)) AS lat FROM wpc_img WHERE point && $bboxg GROUP BY point ORDER BY $orderby ASC LIMIT 256";
+} elseif($algo == 2) {
+  $query = "SELECT page,\"desc\",ST_X(point) AS lon,ST_Y(point) AS lat FROM wpc_img WHERE point && $bboxg LIMIT 256";
+}
 
 $res = pg_query($query);
 if(!$res) {

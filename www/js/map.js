@@ -14,8 +14,9 @@ function setView(position) {
 }
 
 function reloadKML() {
+  var algo = 1;
   if (!wpc.layers.visible) return;
-  if(osm.map.getZoom()<8) return;
+  if(osm.map.getZoom()<8) algo = 2;
   var zoom = osm.map.getZoom();
   var bounds = osm.map.getBounds();
   var minll = bounds.getSouthWest();
@@ -32,7 +33,7 @@ function reloadKML() {
   wpc.bbox[3] = maxll.lat + h/2;
   wpc.zoom = zoom;
   wpc.layers.clearLayers();
-  var url = 'http://osm.sbin.ru/osm-wp2/www/wpc.php?bbox=' + wpc.bbox[0] + ',' + wpc.bbox[1] + ',' + wpc.bbox[2] + ',' + wpc.bbox[3];
+  var url = 'wpc.php?bbox=' + wpc.bbox[0] + ',' + wpc.bbox[1] + ',' + wpc.bbox[2] + ',' + wpc.bbox[3] + '&algo=' + algo;
   wpc.layers.addKML(url);
 }
 
